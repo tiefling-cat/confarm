@@ -135,8 +135,8 @@ def xml_to_conll(ifname, ofname):
             flush_tokens(os.path.basename(ifname), sentence.attrib.get('ID', None), ofile, token_list, id_map)
 
 if __name__ == "__main__":
-    #ifnames, ofnames = get_fnames('../FeatConv', '../Conll', '.xml', '.conll')
-    ifnames, ofnames = get_fnames('Testing', 'Testing', '.xml', '.conll')
+    ifnames, ofnames = get_fnames('../FeatConv', '../Conll', '.xml', '.conll')
+    #ifnames, ofnames = get_fnames('Testing', 'Testing', '.xml', '.conll')
     for ifname, ofname in zip(ifnames, ofnames):
         print('Processing', ifname)
         print('Storing to', ofname)

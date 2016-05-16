@@ -220,5 +220,5 @@ def munch(ifiles, ofiles):
         tree.write(ofname, encoding = 'utf-8')
 
 if __name__ == "__main__":
-    #munch(*get_fnames('../SynTagRus2015', '../FeatConv', '.tgt', '.xml'))
-    munch(*get_fnames('Testing', 'Testing', '.tgt', '.xml'))
+    munch(*get_fnames('../SynTagRus2015', '../FeatConv', '.tgt', '.xml'))
+    #munch(*get_fnames('Testing', 'Testing', '.tgt', '.xml'))
