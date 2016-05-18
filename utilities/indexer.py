@@ -1,5 +1,7 @@
 #! /usr/bin/python3
+
 import os, re, fnmatch, gc
+from dirtools import parsefile
 
 word_re = re.compile('^[а-яё]+[а-яё -]*$')
 
@@ -17,22 +19,6 @@ def getflist(src):
             flist.append(os.path.join(root, filename))
     flist.sort()
     return flist
-
-def parsefile(fname):
-    """
-    Break conll file into list of sentences,
-    which are lists of tokens.
-    """
-    sents, cursent = [], []
-    with open(fname, "r", encoding="utf-8") as ifile:
-        for k, line in enumerate(ifile):
-            if line == "\n":
-                sents.append(cursent)
-                cursent = []
-            else:
-                token = line.strip("\n").split("\t") + [str(k)]
-                cursent.append(token)
-    return sents
 
 def makeindex(flist, iroot, src):
     """

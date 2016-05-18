@@ -17,3 +17,19 @@ def get_fnames(ifolder, ofolder, ext, postfix, plain=False):
 	                    os.makedirs(osubfolder)
                     ofname_list.append(os.path.join(osubfolder, ofname))
     return ifname_list, ofname_list
+
+def parsefile(fname):
+    """
+    Break conll file into list of sentences,
+    which are lists of tokens.
+    """
+    sents, cursent = [], []
+    with open(fname, "r", encoding="utf-8") as ifile:
+        for k, line in enumerate(ifile):
+            if line == "\n":
+                sents.append(cursent)
+                cursent = []
+            else:
+                token = line.strip("\n").split("\t") + [str(k)]
+                cursent.append(token)
+    return sents
