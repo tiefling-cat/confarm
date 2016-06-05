@@ -1,9 +1,11 @@
+#! /usr/bin/python3
+
 from time import process_time
 from lxml import etree
 import os
 
-ifolder = '/home/nm/corpus/post1950'
-ofolder = '/home/nm/corpus-txt/post1950'
+ifolder = '/home/nm/corpus/pre1950'
+ofolder = '/home/nm/corpus-txt/pre1950'
 
 def safe_str(text):
     if text is not None:
@@ -41,7 +43,8 @@ def xml_to_txt(ifname, ofname):
 def convert_all(ifname_list, ofname_list):
     start = process_time()
     for ifname, ofname in zip(ifname_list, ofname_list):
-        xml_to_txt(ifname, ofname)
+        if not os.path.exists(ofname):
+            xml_to_txt(ifname, ofname)
     print('Converted files in {:.3f} sec'.format(process_time() - start))
 
 if __name__ == "__main__":

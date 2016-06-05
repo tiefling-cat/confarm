@@ -1,0 +1,1 @@
+path;sentence id;token id;tokens to sentence end;line number (starting zero)

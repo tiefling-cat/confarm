@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% set title = "Farm Constructions" %}
+
+{% block main %}
+<script src="{{url_for('static', filename='sigmajs/sigma.min.js')}}"></script>
+<script src="{{url_for('static', filename='sigmajs/plugins/sigma.parsers.json.min.js')}}"></script>
+<article>
+<form class="form-horizontal" role="form" id="query">
+  <div class="form-group">
+    <label class="control-label col-md-3" for="lemma">Lemma:</label>
+    <div class="col-md-9">
+      <input type="text" class="form-control" id="lemma" name="lemma" placeholder="Enter lemma">
+    </div>
+  </div>
+  <div class="form-group"> 
+    <label class="control-label col-md-3" for="pos">Part of speech:</label>
+    <div class="col-md-1">
+      <input type="radio" name="pos" value="V" checked /> Verb<br>
+      <input type="radio" name="pos" value="S" /> Noun<br>
+    </div>
+    <label class="control-label col-md-2" for="corpus">Corpus:</label>
+    <div class="col-md-6">
+      <input type="radio" name="corpus" value="stgr" checked /> SynTagRus<br>
+      <input type="radio" name="corpus" value="post" /> Russian National Corpus post-1950<br>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="posfeats">Only with grammatical features:</label>
+    <div class="col-md-9"> 
+      <input type="text" class="form-control" name="posfeats" id="posfeats" placeholder="Enter desirable morphological tags for target lemma" data-role="tagsinput" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="negfeats">Only without grammatical features:</label>
+    <div class="col-md-9"> 
+      <input type="text" class="form-control" name="negfeats" id="negfeats" placeholder="Enter undesirable morphological tags for target lemma" data-role="tagsinput" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="posrels">Only with syntactic relations:</label>
+    <div class="col-md-9"> 
+      <input type="text" class="form-control" name="posrels" id="posrels" placeholder="Enter desirable syntactic relations for extracted construction" data-role="tagsinput" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="negrels">Omit syntactic relations:</label>
+    <div class="col-md-9"> 
+      <input type="text" name="negrels" id="negrels" placeholder="Enter syntactic relations to omit as part of construction" data-role="tagsinput" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="prnegrels">Omit syntactic relations with prepositions:</label>
+    <div class="col-md-9"> 
+      <input type="text" name="prnegrels" id="prnegrels" placeholder="Enter syntactic relations to omit as part of construction" data-role="tagsinput" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="threshold">Minimal construction frequency:</label>
+    <div class="col-md-1"> 
+      <input type="number" class="form-control" name="threshold" id="threshold" min="0" value="2" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-md-3" for="lemma">Special options:</label>
+    <div class="col-md-3">
+      <input type="checkbox" name="usepos" checked="checked" /> Consider part of speech<br>
+      <input type="checkbox" name="case" checked="checked" /> Consider case<br>
+      <input type="checkbox" name="animacy" /> Consider animacy<br>
+    </div>
+    <div class="col-md-6">
+      <input type="checkbox" name="strip" /> Omit positional number for completive relations<br>
+      <input type="checkbox" name="splice" /> Splice completive and circumstantial prepositionals<br>
+    </div>
+  </div>
+</form>
+
+<form class="form-horizontal" role="form" id="submit">
+  <div class="form-group"> 
+    <div class="col-md-offset-3 col-md-9">
+      <button type="submit" method="post" class="btn btn-default" id="extractbutton">Extract!</button>
+    </div>
+  </div>
+</form>
+
+<div class="panel-group" id="loading-indicator" style="display:none">
+  <div class="panel panel-default col-md-12">
+    <div class='panel-heading'>
+      <center>
+        <img src="{{url_for('static', filename='images/bars-loader.gif')}}" />&nbsp;Extracting...
+      </center>
+    </div>
+  </div>
+</div>
+
+<div id="alerts">
+</div>
+
+<div id="container" class="panel panel-default">
+</div>
+
+<div class="panel-group" id="extracted">
+</div>
+</article>
+{% endblock %}

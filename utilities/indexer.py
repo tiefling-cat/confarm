@@ -5,8 +5,8 @@ from dirtools import parsefile
 
 word_re = re.compile('^[а-яё]+[а-яё -]*$')
 
-croot = "../SynTagRus2015Conll"
-iroot = "../index-str"
+croot = "/home/nm/corpus-annotated/post1950"
+iroot = "../index-post1950"
 threshold = 10000
 
 def getflist(src):
@@ -59,7 +59,7 @@ def makeindex(flist, iroot, src):
 
 def dump(index, iroot):
     """
-    Dump a ready part of index into folders.
+    Dump a ready part of index into the folders.
     """
     for key in index:
         fname = os.path.join(iroot, key[0], key + ".txt")

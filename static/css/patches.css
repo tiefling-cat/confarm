@@ -1,0 +1,73 @@
+.boxedlemma {
+    color:white;
+    text-decoration: none;
+}
+
+.boxedlemma:link {
+    color:white;
+    text-decoration: none;
+}
+
+.boxedlemma:visited {
+    color:white;
+    text-decoration: none;
+}
+
+.boxedlemma:hover {
+    color:white;
+    text-decoration: underline;
+}
+
+.boxedlemma:active {
+    color:white;
+    text-decoration: underline;
+}
+
+.plainlemma {
+    color:black;
+    text-decoration: none;
+}
+
+.plainlemma:link {
+    color:black;
+    text-decoration: none;
+}
+
+.plainlemma:visited {
+    color:black;
+    text-decoration: none;
+}
+
+.plainlemma:hover {
+    color:black;
+    text-decoration: underline;
+}
+
+.plainlemma:active {
+    color:black;
+    text-decoration: underline;
+}
+
+.popover {
+    white-space: pre-line;
+    color:black;
+}
+
+.badge {
+    margin-left:10px;
+}
+
+#container {
+    height: 400px;
+    margin: auto;
+    margin-bottom: 10px;
+    display:none;
+}
+
+.bootstrap-tagsinput {
+    width: 100%;
+}
+
+.bootstrap-tagsinput input {
+    width: 100%;
+}
