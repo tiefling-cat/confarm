@@ -20,7 +20,7 @@ def flush_tokens(ifname, sent_id, ofile, token_list, id_map):
     """
     Here our sentence finally makes it to the file.
     """
-    #root_id = None
+
     try:
         terminal = token_list[-1] # correct pos and feat for terminal symbol
         if not re.match('^[А-ЯЁа-яё-]$', terminal[1]): # if it's a word, don't touch it
@@ -31,7 +31,7 @@ def flush_tokens(ifname, sent_id, ofile, token_list, id_map):
             else: # for others, we correct it via id_map
                 try:
                     ofile.write('\t'.join(list(token[:6]) + [id_map[token[6]]] + list(token[7:])) + '\n')
-                except KeyError: # if id is not in the map, something's fucking wrong
+                except KeyError: # if id is not in the map, something went wrong
                     ids = list(id_map.keys())
                     ids.sort(key = lambda x: int(x))
                     print('Error in {}, {} at'.format(ifname, sent_id), token)
@@ -48,7 +48,7 @@ def flush_tokens(ifname, sent_id, ofile, token_list, id_map):
 
 def get_fucking_punc(punc, punc_id, token_id, offset, before=True):
     """
-    Here we deal with fucking PUNCs by making tokens out of them.
+    Here we deal with PUNCs by making tokens out of them.
     """
     true_id = punc_id + offset
     true_dom = token_id + offset
@@ -102,13 +102,13 @@ def munch_token(token, prev_token, id_offset, token_list, id_map):
     token = (str(token_id + id_offset), form, lemma, pos, '_', feat, dom, link, '_', '_')
     token_list.append(token)
 
-    if punc_after: # found fucking punctuation after the token
+    if punc_after: # found punctuation after the token
         for i, punc in enumerate(punc_after): # there can be many of them!
             punc_token_after = get_fucking_punc(punc, token_id + i, token_id, id_offset, before=False)
             token_list.append(punc_token_after)
     id_map[str(token_id)] = str(token_id + id_offset)
 
-    if punc_after: # change offset if there is fucking punctuation after the token
+    if punc_after: # change offset if there is punctuation after the token
         id_offset += len(punc_after)
     return id_offset
 
@@ -135,8 +135,7 @@ def xml_to_conll(ifname, ofname):
             flush_tokens(os.path.basename(ifname), sentence.attrib.get('ID', None), ofile, token_list, id_map)
 
 if __name__ == "__main__":
-    ifnames, ofnames = get_fnames('../FeatConv', '../Conll', '.xml', '.conll')
-    #ifnames, ofnames = get_fnames('Testing', 'Testing', '.xml', '.conll')
+    ifnames, ofnames = get_fnames('/home/nm/syntagrus-annotated', '/home/nm/syntagrus-reannotated', '.xml', '.conll')
     for ifname, ofname in zip(ifnames, ofnames):
         print('Processing', ifname)
         print('Storing to', ofname)

@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 import os
-from simpl_ex import get_children
+from simpl_ex import prepare_tokens, extract_frame
 croot = '/home/nm/repos/confarm/sqlframebank/examples-annotated'
 
 def extract(croot, splice, strip, posrels, negrels, prnegrels):
@@ -21,17 +21,7 @@ def extract(croot, splice, strip, posrels, negrels, prnegrels):
         tok_id = None
         for raw_sent in raw_sents:
             if tok_id is None:
-                raw_tokens = raw_sent.split('\n')
-                tokens = []
-                for token in raw_tokens:
-                    token = token.strip().split('\t')
-                    token[4] = token[3]
-                    if token[5][0].isupper():
-                        try:
-                            token[5] = token[5].split(' ', maxsplit=1)[1]
-                        except IndexError:
-                            token[5] = '_'
-                    tokens.append(token)
+                tokens = prepare_tokens(raw_sent.split('\n'))
                 for token in tokens:
                     try:
                         if token[1].lower().strip('.,!?;:)(«»"') == word:
@@ -43,10 +33,15 @@ def extract(croot, splice, strip, posrels, negrels, prnegrels):
         else:
             # extract frame
             try:
-                frame = get_children(tokens, tok_id, usepos=True,
+                frame = extract_frame(tokens, tok_id, 
+                                 usepos=True, pro = True,
                                  usecase=True, useanim=False,
-                                 splice=splice, strip=strip, 
-                                 negrels=negrels, prnegrels=prnegrels)
+                                 splice=False, strip=False, 
+                                 posfeats = (), negfeats = (),
+                                 posrels = (),
+                                 negrels=('аналит', 'огранич', 'вводн', 'разъяснит'), 
+                                 prnegrels=())
+                frame.append(tokens[tok_id - 1])
             except IndexError:
                 print('Another shitfuck at', ifname)
                 print(word, tok_id)
@@ -56,6 +51,7 @@ def extract(croot, splice, strip, posrels, negrels, prnegrels):
             ofile.write('-' * 75 + '\n')
             ofile.write('{}\t{}\n'.format(ifname.split('.')[0], word))
             ofile.write('-' * 75 + '\n\n')
+            frame.sort(key=lambda token: int(token[0]))
             for token in frame:
                 ofile.write('\t'.join(token[:2] + [str(token[8]), token[9]]) + '\n')
             ofile.write('\n')

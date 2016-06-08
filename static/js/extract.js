@@ -10,7 +10,7 @@ $(document).ready(function(){
         });
     }
 
-    var colors = ['#a3a375', '#7a1f5c', '#006666', '#2d8659', '#2d8659'];
+    var colors = ['#a3a375', '#7a1f5c', '#006666', '#2d8659', '#2d8659', '#d279a6', '#00b3b3', '#00cc99', '#00cc99', '#c3c3a2'];
 
     function render(frame, id){
         // show sentence with fancy boxes indicating parts of construction
@@ -36,7 +36,7 @@ $(document).ready(function(){
                 }
             } else {
                 var poptitle = token[2];
-                var popcontent = token[3];
+                var popcontent = token[0] + ' | ' + token[3];
                 if (token[5] != '_') {
                     popcontent = popcontent + ' ' + token[5];
                 }
@@ -45,15 +45,14 @@ $(document).ready(function(){
                 var space = (nospace || token[1] == '%') ? '' : ' '; // here was a quot or a parenthesis
                 if (token[8] != 0) { // fancy boxes and popovers for frame parts
                     if (token[8] != 1) {
-                        if (token[9] != '_') {
-                            popline = popline + ' | ' + token[9]; 
-                        } else {
-                            popline = popline + ' | ' + token[7];
-                        }
+                        popline = popline + ' | ' + token[9] + ' | ' + token[6]; 
+                    } else {
+                        popline = popline + ' | ' + token[9] + ' | ' + token[6];
                     }
-                        sent = sent + space + "<span class='label' style='background-color:" + colors[token[8]] + "'>" + popline +
-                               "' class='boxedlemma'>" + token[1] + "</a></span>";
+                    sent = sent + space + "<span class='label' style='background-color:" + colors[token[8]] + "'>" + popline +
+                        "' class='boxedlemma'>" + token[1] + "</a></span>";
                 } else { // only popovers for not frame parts
+                    popline = popline + ' | ' + token[9] + ' | ' + token[6];
                     sent = sent + space + popline + "' class='plainlemma'>" + token[1] + "</a>";
                 }
             }
@@ -128,6 +127,7 @@ $(document).ready(function(){
              pos:$('input[name=pos]:checked', '#query').val(),
              corpus:$('input[name=corpus]:checked', '#query').val(),
              usepos:$('input[name=usepos]', '#query').is(":checked"),
+             pro:$('input[name=pro]', '#query').is(":checked"),
              usecase:$('input[name=case]', '#query').is(":checked"),
              useanim:$('input[name=animacy]', '#query').is(":checked"),
              splice:$('input[name=splice]', '#query').is(":checked"),
@@ -157,7 +157,7 @@ $(document).ready(function(){
                 $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Please enter positive integer value for minimal frequency!</strong></div>');
             } else {
                   if ($('input[name=corpus]:checked', '#query').val() == 'post') {
-                      $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Sorry, Russian National Corpus is temporarily unavailable due to the host regulations.</strong></div>');
+                      $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Sorry, Russian National Corpus is temporarily unavailable due to hosting\'s technical limitations. To enjoy full functionality, visit <a href="http://tieflingcat.pythonanywhere.com/extract">our mirror.</a></strong></div>');
                   } else {
                         // everything ok
                         $('#loading-indicator').show();

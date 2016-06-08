@@ -5,8 +5,8 @@ from dirtools import parsefile
 
 word_re = re.compile('^[а-яё]+[а-яё -]*$')
 
-croot = "/home/nm/corpus-annotated/post1950"
-iroot = "../index-post1950"
+croot = "/home/nm/syntagrus-reannotated"
+iroot = "/home/nm/syntagrus-index"
 threshold = 10000
 
 def getflist(src):
@@ -29,14 +29,13 @@ def makeindex(flist, iroot, src):
     cfnum, toknum, fnum = 0, 0, 0
 
     for fname in flist:
-        #print('Processing', fname)
         sents = parsefile(fname)
         fnum, cfnum = fnum + 1, cfnum + 1
 
         for j, sent in enumerate(sents):
             for token in sent:
                 lemma = token[2].lower()
-                if word_re.match(lemma): # need only words
+                if word_re.match(lemma): # need only real words
                     key = ".".join([lemma, token[3]])
                     item = ";".join((os.path.relpath(fname, src), str(j), token[0], str(len(sent) - int(token[0])), token[-1]))
                     if not key in index:

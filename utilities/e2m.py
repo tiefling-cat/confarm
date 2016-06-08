@@ -17,6 +17,7 @@ mystem_options = [
     ]
 #-------------------------------------------------------------------------
 
+# everything about individual morphological features
 gender = (re.compile(r'\b((МУЖ)|(ЖЕН)|(СРЕД))\b'), {'МУЖ':'m', 'ЖЕН':'f', 'СРЕД':'n'}, '-')
 number = (re.compile(r'\b((ЕД)|(МН))\b'), {'ЕД':'sg', 'МН':'pl'}, '-')
 anim = (re.compile(r'\b((ОД)|(НЕОД))\b'), {'ОД':'anim', 'НЕОД':'inan'}, '-')
@@ -25,7 +26,6 @@ case = (re.compile(r'\b((ИМ)|(РОД)|(ДАТ)|(ВИН)|(ТВОР)|(ПР)|(П�
 		 'ПР':'loc', 'ПАРТ':'part', 'МЕСТН':'loc2', 'ЗВ':'voc', 'НЕСКЛ':'nonflex'}, '-')
 brev = (re.compile(r'\b((КР))\b'), {'КР':'brev'}, 'plen')
 relat = (re.compile(r'\b((СРАВ)|(ПРЕВ))\b'), {'СРАВ':'comp', 'ПРЕВ':'supr'}, '-')
-#tense = (re.compile(r'\b((НЕПРОШ)|(ПРОШ)|(НАСТ))\b'), {'НЕПРОШ':'inpraes', 'ПРОШ':'praet', 'НАСТ':'inpraes'}, '-')
 tense = (re.compile(r'\b((ПРОШ)|(НАСТ)|(БУДУЩ))\b'), {'ПРОШ':'praet', 'НАСТ':'praes', 'БУДУЩ':'fut'}, '-')
 aspect = (re.compile(r'\b((НЕСОВ)|(СОВ))\b'), {'НЕСОВ':'ipf', 'СОВ':'pf'}, '-')
 repres = (re.compile(r'\b((ИЗЪЯВ)|(ПОВ)|(ИНФ)|(ДЕЕПР))\b'), {'ИЗЪЯВ':'indic', 'ПОВ':'imper', 'ИНФ':'inf', 'ДЕЕПР':'ger'}, '-')
@@ -33,6 +33,7 @@ person = (re.compile(r'\b([123]-Л)\b'), {'1-Л':'1p', '2-Л':'2p', '3-Л':'3p'}
 voice = (re.compile(r'\b((СТРАД))\b'), {'СТРАД':'pass'}, 'act')
 dim_re = re.compile(r'\bСМЯГ\b')
 
+# part-of-speech-specific lists of features
 S_feats = (gender, anim, case, number)
 A_feats = (relat, case, number, brev, gender, anim)
 ADV_feats = (relat,)
@@ -40,6 +41,7 @@ NUM_feats = (case, gender, anim)
 V_feats = (aspect, tense, number, repres, gender, person)
 PARTCP_feats = (aspect, tense, case, number, brev, gender, voice, anim)
 
+# features to extract from Mystem analyses
 ms_gender = re.compile(r'\b[mfn]\b')
 ms_number = re.compile(r'\b(sg|pl)\b')
 ms_case = re.compile(r'\b(nom|gen|dat|acc|ins|loc|part|abl|voc)\b')
@@ -47,6 +49,7 @@ ms_casenum = re.compile(r'\b(nom|gen|dat|acc|ins|loc|part|abl|voc) (sg|pl)\b')
 
 empty_adv = ('ADV', (['-'], []))
 
+# data for special corrections
 gtfo_tags = ['СЛ', 'НЕСТАНД', 'НЕПРАВ', 'МЕТА']
 repl_part_dict = {'УЖЕ':empty_adv, 'ЕЩЕ':empty_adv, 'ПОЧТИ':empty_adv, 'ТАКЖЕ':empty_adv, 'ЧУТЬ':empty_adv}
 repl_part_list = ['УЖЕ', 'ЕЩЕ', 'ПОЧТИ', 'ТАКЖЕ', 'ЧУТЬ']
@@ -66,12 +69,20 @@ spro_dict = {
 apro_list = ['его', 'ее', 'их']
 
 def convert_feat(feat, feat_line):
+    """
+    Find in feat_line a single feature 
+    using regex specified in feat and convert it.
+    """
     match = feat[0].search(feat_line)
     if match:
         return feat[1][match.group(0)], match.group(0)
     return feat[2], ''
 
 def munch_feats(POS_feats, feat_line):
+    """
+    Find and convert all features in feat_line
+    using regexes specified in POS_feats.
+    """
     for tag in gtfo_tags:
         feat_line = feat_line.replace(tag, '')
     converts, finds = [], []
@@ -83,6 +94,9 @@ def munch_feats(POS_feats, feat_line):
     return converts, rejects
 
 def detect_nonflex(analyses):
+    """
+    Check if a token is undeclined.
+    """
     all_feats = ' '.join([analysis.get('gr', '').replace(',', ' ').replace('=', ' ') 
                                 for analysis in analyses])
     casenums = set(ms_casenum.findall(all_feats))
@@ -100,6 +114,9 @@ def detect_nonflex(analyses):
     return False, False
 
 def convert_feats(feat_line, lemma, text, reltype, mystemized):
+    """
+    Convert morphology features of a token.
+    """
     pos = feat_line.split(' ', 1)[0]
     feat_line = feat_line.replace(pos, '')
     if pos == 'S':
@@ -154,12 +171,16 @@ def convert_feats(feat_line, lemma, text, reltype, mystemized):
         return 'ADV', (['-'], []), None
     return pos, ([], []), None
 
-def mystemize_tokens(filename):
+def mystemize_tokens(root):
+    """
+    Get alternative analisys from Mystem
+    to use it for undeclined nouns' detection.
+    """
     tempfolder = 'tmp'
     if not os.path.exists(tempfolder):
         os.makedirs(tempfolder)
-    tree = ET.parse(filename)
-    root = tree.getroot()
+    #tree = ET.parse(filename)
+    #root = tree.getroot()
     text = ''
     temp_i_fname = os.path.join(tempfolder, 'temp1.txt')
     temp_o_fname = os.path.join(tempfolder, 'temp2.txt')
@@ -180,12 +201,11 @@ def munch(ifiles, ofiles):
     for ifname, ofname in zip(ifiles, ofiles):
         print('Processing', ifname)
         print('Storing to', ofname)
-        mystemized_gen = mystemize_tokens(ifname)
         tree = ET.parse(ifname)
         root = tree.getroot()
 
+        # first remove everything we won't need
         for sentence in root.find('body').findall('S'):
-
             # scan for phantoms and remove sentence altogether if found
             if any('NODETYPE' in word.attrib for word in sentence.findall('W')):
                 sentence.getparent().remove(sentence)
@@ -197,10 +217,22 @@ def munch(ifiles, ofiles):
                 for lfshit in sentence.findall('LF'):
                     lfshit.getparent().remove(lfshit)
 
+        mystemized_gen = mystemize_tokens(root)
+
+        # then convert
+        for sentence in root.find('body').findall('S'):
             # reassign feats
             for token in sentence.findall('W'):
                 mystemized = next(mystemized_gen)
+                mtext = mystemized[0]['text'].strip()
                 text = token.text
+                
+                # in case of emergency, bail out
+                if not text.startswith(mtext):
+                    print("'{}', '{}'".format(text, mtext))
+                    print('This is it')
+                    sys.exit(0)
+
                 if text is not None:
                     text = text.strip().lower()
 
@@ -220,5 +252,4 @@ def munch(ifiles, ofiles):
         tree.write(ofname, encoding = 'utf-8')
 
 if __name__ == "__main__":
-    munch(*get_fnames('../SynTagRus2015', '../FeatConv', '.tgt', '.xml'))
-    #munch(*get_fnames('Testing', 'Testing', '.tgt', '.xml'))
+    munch(*get_fnames('/home/nm/repos/ru-syntax/ass-sorted/SynTagRus2015orig', '/home/nm/syntagrus-annotated', '.tgt', '.xml'))
