@@ -1,5 +1,3 @@
-#! /usr/bin/python3
-
 import os, json
 from time import process_time
 import matplotlib.pyplot as plt
@@ -9,6 +7,7 @@ prdict = {"ОБО":"О", "ОБ":"О", "СО":"С", "ИЗО":"ИЗ", "ОТО":"О
           "ПРЕДО":"ПЕРЕД", "ПРЕД":"ПЕРЕД", "ПЕРЕДО":"ПЕРЕД",
           "ЧРЕЗ":"ЧЕРЕЗ", "ЧЕРЕЗО":"ЧЕРЕЗ", "ЧРЕЗО":"ЧЕРЕЗ"}
 
+subjrels = {'предик', 'дат-субъект', 'агент', 'квазиагент', 'несобст-агент'}
 relfilter = {'сент-соч', 'сочин', 'соч-союзн'}
 coord_set = {'сочин', 'соч-союзн'}
 emergency_coord_set = {'сравн-союзн', 'подч-союзн'}
@@ -35,32 +34,34 @@ def get_index(lemma, iroot):
     return idict
 
 def get_relset(frame):
-    reldict, relset = {}, set()
+    """
+    Form relation signature.
+    """
+    subj, other = {}, {}
     for token in frame:
         rel = token[9]
-        reldict[rel] = reldict.get(rel, 0) + 1
-    for rel, count in reldict.items():
-        relset.add(rel)
+        for subjrel in subjrels:
+            if rel.startswith(subjrel):
+                subj[rel] = subj.get(rel, 0) + 1
+                break
+        else:
+            other[rel] = other.get(rel, 0) + 1
+
+    subjlist = []
+    for rel, count in subj.items():
+        subjlist.append(rel)
         for i in range(2, count + 1):
-            relset.add('-'.join([rel, str(i)]))
-    relset = list(relset)
-    relset.sort()
-    return tuple(relset)
+            subjist.append('-'.join([rel, str(i)]))
+    subjlist.sort()
 
-def get_relset_dict(sents, threshold):
-    relset_dict = {}
-    for head_id, sent, frame in sents:
-        relset = get_relset(frame)
-        if relset not in relset_dict:
-            relset_dict[relset] = []
-        relset_dict[relset].append((head_id, sent, frame))
+    otherlist = []
+    for rel, count in other.items():
+        otherlist.append(rel)
+        for i in range(2, count + 1):
+            otherlist.append('-'.join([rel, str(i)]))
+    otherlist.sort()
 
-    clean = {}
-    for relset_class, relset in relset_dict.items():
-        if len(relset) >= threshold:
-            clean[relset_class] = relset
-
-    return clean
+    return tuple(subjlist + otherlist)
 
 def to_str(relset):
     if relset == ():
@@ -116,7 +117,7 @@ def make_json_digraph(relset_levels, relset_ids, jsonpath):
     with open(jsonpath, 'w', encoding='utf-8') as jsonfile:
         json.dump({'nodes':nodes, 'edges':edges}, jsonfile)
 
-def get_relset_classes(relset_dict, threshold):
+def get_relset_classes(relset_dict):
     relset_classes = list(relset_dict.keys())
     relset_classes.sort(key=len)
     relset_ids = {relset_class:'n' + str(i) for i, relset_class in enumerate(relset_classes)}
@@ -204,7 +205,7 @@ def get_children(sent, dad_id, marker_set, pr=True,
                         token[8] = marker_set[4]
                     children.append(token)
             elif pr and token[7] not in prnegrels:
-                # preposition
+                # it's a preposition
                 # deal with preposition's children
                 token[8] = marker_set[3]
                 pr_children = get_children(sent[i+1:], i+1, marker_set, pr=False)
@@ -364,8 +365,7 @@ def extract_frame(tokens, tok_id,
             token[9] = token[9].replace('PRO', '')
     return frame
 
-
-def extract(idict, croot, 
+def extract(idict, croot, minfreq, maxcon, minpts,
             usepos, pro, usecase, useanim, 
             splice, strip, 
             posfeats, negfeats, 
@@ -374,8 +374,7 @@ def extract(idict, croot,
     Find all sentences within idict,
     get them, extract frames.
     """
-    con_sents = []
-    totl = len(idict)
+    relset_dict, totl = {}, len(idict)
     for i, (ifname, entries) in enumerate(idict.items()):
         print('{}/{} Extracting from {}'.format(i, totl, ifname))
         path = os.path.join(croot, ifname)
@@ -404,15 +403,24 @@ def extract(idict, croot,
                                       posfeats, negfeats, 
                                       posrels, negrels, prnegrels)
 
-                if posrels == [] or posrels == () or \
-                   any(token[7] in posrels for token in frame if token[0] != tok_id):
-                    con_sents.append((tok_id, tokens, frame))
-    return con_sents
+                if len(frame) >= minpts:
+                    if posrels == [] or posrels == () or \
+                       any(token[7] in posrels for token in frame if token[0] != tok_id):
+                        relset = get_relset(frame)
+                        relset_dict.setdefault(relset, [])
+                        if len(relset_dict[relset]) < maxcon:
+                            relset_dict[relset].append((tok_id, tokens, frame))
+
+    clean = {}
+    for relset, frames in relset_dict.items():
+        if len(frames) >= minfreq:
+            clean[relset] = frames
+    return clean
 
 def extract_frames(lemma, iroot, croot, jsonpath, usepos=False,
                    usecase=False, pro=False, useanim=False, splice=False, strip=False,
                    posfeats=(), negfeats=(), posrels=(), negrels=(), prnegrels=(),
-                   threshold=2):
+                   minfreq=2, maxcon=100, minpts=1):
     """
     Extract frames from Alpha to Omega.
     """
@@ -425,26 +433,26 @@ def extract_frames(lemma, iroot, croot, jsonpath, usepos=False,
         return {'error':'FileNotFoundError'}
 
     print('Extracting constructions')
-    sents = extract(idict, croot, usepos, pro, usecase, useanim, splice, strip,
-                    posfeats=posfeats, negfeats=negfeats,
-                    posrels=posrels, negrels=negrels, prnegrels=prnegrels)
+    relset_dict = extract(idict, croot, minfreq, maxcon, minpts, 
+                          usepos, pro, usecase, useanim, splice, strip,
+                          posfeats=posfeats, negfeats=negfeats,
+                          posrels=posrels, negrels=negrels, prnegrels=prnegrels)
     print('Done extracting constructions')
 
-    if sents == []:
+    if relset_dict == {}:
         print('No constructions found')
         return {'json':'', 'classes':[], 'frames':[], 'error':'NoExtract'}
 
-    print('Classifying constructions')
-    relset_dict = get_relset_dict(sents, threshold)
-    relset_classes, relset_ids = get_relset_classes(relset_dict, threshold)
-
     total = 0
-    for relset_class, relset in relset_dict.items():
-        total += len(relset)
+    for relset_class, frames in relset_dict.items():
+        total += len(frames)
 
     if total > hardcap:
         print('Too many constructions found')
         return {'json':'', 'classes':[], 'frames':[], 'error':'TooMany'}
+
+    print('Classifying constructions')
+    relset_classes, relset_ids = get_relset_classes(relset_dict)
 
     #with open('classes.log', 'w', encoding='utf-8') as clfile:
     #    for relset_class in relset_classes:

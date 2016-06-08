@@ -71,7 +71,9 @@ def extract_frames():
     useanim = (request.values.get('useanim', 'false') == 'true')
     splice = (request.values.get('splice', 'false') == 'true')
     strip = (request.values.get('strip', 'false') == 'true')
-    threshold = int(request.values.get('threshold', 1))
+    minfreq = int(request.values.get('minfreq', 1))
+    maxcon = int(request.values.get('maxcon', 100))
+    minpts = int(request.values.get('minpts', 1))
     posfeats = parse_tagsinput('posfeats')
     negfeats = parse_tagsinput('negfeats')
     posrels = parse_tagsinput('posrels')
@@ -82,7 +84,8 @@ def extract_frames():
     iroot, croot = corpora[corpus]
 
     with open('params.log', 'a', encoding='utf-8') as pfile:
-        pfile.write('\t'.join([lemma, pos, str(usepos), str(pro), str(usecase), str(useanim), str(splice), str(strip), str(threshold)]) + '\n' + 
+        pfile.write('\t'.join([lemma, pos, str(usepos), str(pro), str(usecase), str(useanim), str(splice), str(strip)]) + '\n' +
+                    '\t'.join([str(minfreq), str(maxcon), str(minpts)]) + '\n' + 
                     '\n'.join([str(posfeats), str(negfeats), str(posrels), str(negrels), str(prnegrels), iroot, croot]))
 
     if lemma != '':
@@ -90,7 +93,7 @@ def extract_frames():
         extracted = xf((lemma, pos), iroot=iroot, croot=croot, jsonpath=jsonpath, usepos=usepos,
                        usecase=usecase, pro=pro, useanim=useanim, splice=splice, strip=strip,
                        posfeats=posfeats, negfeats=negfeats, posrels=posrels, negrels=negrels, prnegrels=prnegrels,
-                       threshold=threshold)
+                       minfreq=minfreq, maxcon=maxcon, minpts=minpts)
     else:
         extracted = {}
 

@@ -132,7 +132,9 @@ $(document).ready(function(){
              useanim:$('input[name=animacy]', '#query').is(":checked"),
              splice:$('input[name=splice]', '#query').is(":checked"),
              strip:$('input[name=strip]', '#query').is(":checked"),
-             threshold:$('#threshold').val(),
+             minfreq:$('#minfreq').val(),
+             maxcon:$('#maxcon').val(),
+             minpts:$('#minpts').val(),
              posfeats:$('#posfeats').val(),
              negfeats:$('#negfeats').val(),
              posrels:$('#posrels').val(),
@@ -151,8 +153,8 @@ $(document).ready(function(){
             // no lemma entered, can't extract
             $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Please enter lemma!</strong></div>');
         } else {
-            var threshold = +($('#threshold').val());
-            if (isNaN(threshold) || threshold < 0 || $('#threshold').val() == '') {
+            var minfreq = +($('#minfreq').val());
+            if (isNaN(minfreq) || minfreq < 0 || $('#minfreq').val() == '') {
                 // somehow min threshold is not a number
                 $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Please enter positive integer value for minimal frequency!</strong></div>');
             } else {
