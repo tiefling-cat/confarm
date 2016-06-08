@@ -1,6 +1,4 @@
 import os, json
-from time import process_time
-import matplotlib.pyplot as plt
 
 prdict = {"ОБО":"О", "ОБ":"О", "СО":"С", "ИЗО":"ИЗ", "ОТО":"ОТ",
           "ВО":"В", "КО":"К", "БЕЗО":"БЕЗ", "НАДО":"НАД", "ПОДО":"ПОД",
