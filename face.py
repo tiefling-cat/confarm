@@ -72,6 +72,7 @@ def extract_frames():
     splice = (request.values.get('splice', 'false') == 'true')
     strip = (request.values.get('strip', 'false') == 'true')
     minfreq = int(request.values.get('minfreq', 1))
+    maxfreq = int(request.values.get('maxfreq', -1))
     maxcon = int(request.values.get('maxcon', 100))
     minpts = int(request.values.get('minpts', 1))
     posfeats = parse_tagsinput('posfeats')
@@ -93,7 +94,7 @@ def extract_frames():
         extracted = xf((lemma, pos), iroot=iroot, croot=croot, jsonpath=jsonpath, usepos=usepos,
                        usecase=usecase, pro=pro, useanim=useanim, splice=splice, strip=strip,
                        posfeats=posfeats, negfeats=negfeats, posrels=posrels, negrels=negrels, prnegrels=prnegrels,
-                       minfreq=minfreq, maxcon=maxcon, minpts=minpts)
+                       minfreq=minfreq, maxfreq=maxfreq, maxcon=maxcon, minpts=minpts)
     else:
         extracted = {}
 

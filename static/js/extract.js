@@ -133,6 +133,7 @@ $(document).ready(function(){
              splice:$('input[name=splice]', '#query').is(":checked"),
              strip:$('input[name=strip]', '#query').is(":checked"),
              minfreq:$('#minfreq').val(),
+             maxfreq:$('#maxfreq').val(),
              maxcon:$('#maxcon').val(),
              minpts:$('#minpts').val(),
              posfeats:$('#posfeats').val(),

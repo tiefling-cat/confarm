@@ -46,13 +46,13 @@
   <div class="form-group">
     <label class="control-label col-md-3" for="negrels">Omit syntactic relations:</label>
     <div class="col-md-9"> 
-      <input type="text" name="negrels" id="negrels" placeholder="Enter syntactic relations to omit as part of construction" data-role="tagsinput" />
+      <input type="text" name="negrels" id="negrels" placeholder="Enter syntactic relations to exclude from construction" data-role="tagsinput" />
     </div>
   </div>
   <div class="form-group">
     <label class="control-label col-md-3" for="prnegrels">Omit syntactic relations with prepositions:</label>
     <div class="col-md-9"> 
-      <input type="text" name="prnegrels" id="prnegrels" placeholder="Enter syntactic relations to omit as part of construction" data-role="tagsinput" />
+      <input type="text" name="prnegrels" id="prnegrels" placeholder="Enter syntactic relations to exclude from construction" data-role="tagsinput" />
     </div>
   </div>
   <div class="form-group">
@@ -60,24 +60,33 @@
     <div class="col-md-1"> 
       <input type="number" class="form-control" name="minfreq" id="minfreq" min="0" value="2" />
     </div>
-    <label class="control-label col-md-3" for="maxcon">Max constructions per class:</label>
-    <div class="col-md-1"> 
-      <input type="number" class="form-control" name="maxcon" id="maxcon" min="0" value="100" />
-    </div>
-    <label class="control-label col-md-3" for="minpts">Min parts per construction:</label>
+    <label class="control-label col-md-5" for="minpts">Min elements per construction:</label>
     <div class="col-md-1"> 
       <input type="number" class="form-control" name="minpts" id="minpts" min="0" value="1" />
     </div>
   </div>
   <div class="form-group">
-    <label class="control-label col-md-3" for="lemma">Special options:</label>
-    <div class="col-md-3">
-      <input type="checkbox" name="usepos" checked="checked" /> Consider part of speech<br>
-      <input type="checkbox" name="pro" checked="checked" /> SPRO = S, APRO = A<br>
-      <input type="checkbox" name="case" checked="checked" /> Consider case<br>
-      <input type="checkbox" name="animacy" /> Consider animacy<br>
+    <label class="control-label col-md-3" for="maxfreq">Max construction frequency:</label>
+    <div class="col-md-1"> 
+      <input type="number" class="form-control" name="maxfreq" id="maxfreq" min="-1" value="-1" />
     </div>
-    <div class="col-md-6">
+    <label class="control-label col-md-2" for="maxfreq" style="font-weight: normal;">(set to -1 for unlimited)</label>
+    <label class="control-label col-md-3" for="maxcon">Max examples per class:</label>
+    <div class="col-md-1">
+      <input type="number" class="form-control" name="maxcon" id="maxcon" min="-1" value="100" />
+    </div>
+    <label class="control-label col-md-2" for="maxcon" style="font-weight: normal;">(set to -1 for unlimited)</label>
+  </div>
+  <div class="form-group">
+    <div class="col-md-offset-3 col-md-2">
+      <input type="checkbox" name="usepos" checked="checked" /> Include part of speech<br>
+      <input type="checkbox" name="pro" checked="checked" /> SPRO = S, APRO = A<br>
+    </div>
+    <div class="col-md-2">
+      <input type="checkbox" name="case" checked="checked" /> Include case<br>
+      <input type="checkbox" name="animacy" /> Include animacy<br>
+    </div>
+    <div class="col-md-4">
       <input type="checkbox" name="strip" /> Omit positional number for completive relations<br>
       <input type="checkbox" name="splice" /> Splice completive and circumstantial prepositionals<br>
     </div>

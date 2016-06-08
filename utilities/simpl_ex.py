@@ -51,7 +51,7 @@ def get_relset(frame):
     for rel, count in subj.items():
         subjlist.append(rel)
         for i in range(2, count + 1):
-            subjist.append('-'.join([rel, str(i)]))
+            subjlist.append('-'.join([rel, str(i)]))
     subjlist.sort()
 
     otherlist = []
@@ -365,7 +365,8 @@ def extract_frame(tokens, tok_id,
             token[9] = token[9].replace('PRO', '')
     return frame
 
-def extract(idict, croot, minfreq, maxcon, minpts,
+def extract(idict, croot, 
+            minfreq, maxfreq, maxcon, minpts,
             usepos, pro, usecase, useanim, 
             splice, strip, 
             posfeats, negfeats, 
@@ -408,19 +409,20 @@ def extract(idict, croot, minfreq, maxcon, minpts,
                        any(token[7] in posrels for token in frame if token[0] != tok_id):
                         relset = get_relset(frame)
                         relset_dict.setdefault(relset, [])
-                        if len(relset_dict[relset]) < maxcon:
+                        if maxcon == -1 or len(relset_dict[relset]) < maxcon:
                             relset_dict[relset].append((tok_id, tokens, frame))
 
     clean = {}
     for relset, frames in relset_dict.items():
         if len(frames) >= minfreq:
-            clean[relset] = frames
+            if maxfreq == -1 or len(frames) <= maxfreq:
+                clean[relset] = frames
     return clean
 
 def extract_frames(lemma, iroot, croot, jsonpath, usepos=False,
                    usecase=False, pro=False, useanim=False, splice=False, strip=False,
                    posfeats=(), negfeats=(), posrels=(), negrels=(), prnegrels=(),
-                   minfreq=2, maxcon=100, minpts=1):
+                   minfreq=2, maxfreq=-1, maxcon=100, minpts=1):
     """
     Extract frames from Alpha to Omega.
     """
@@ -433,7 +435,7 @@ def extract_frames(lemma, iroot, croot, jsonpath, usepos=False,
         return {'error':'FileNotFoundError'}
 
     print('Extracting constructions')
-    relset_dict = extract(idict, croot, minfreq, maxcon, minpts, 
+    relset_dict = extract(idict, croot, minfreq, maxfreq, maxcon, minpts, 
                           usepos, pro, usecase, useanim, splice, strip,
                           posfeats=posfeats, negfeats=negfeats,
                           posrels=posrels, negrels=negrels, prnegrels=prnegrels)
