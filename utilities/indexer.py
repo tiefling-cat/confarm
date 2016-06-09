@@ -5,8 +5,8 @@ from dirtools import parsefile
 
 word_re = re.compile('^[а-яё]+[а-яё -]*$')
 
-croot = "/home/nm/syntagrus-reannotated"
-iroot = "/home/nm/syntagrus-index"
+croot = "/home/nm/corpus-annotated/pre1950"
+iroot = "/home/nm/pre1950-index"
 threshold = 10000
 
 def getflist(src):

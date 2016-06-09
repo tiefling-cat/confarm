@@ -79,7 +79,9 @@ $(document).ready(function(){
             var i = 0;
             $.each(data.classes, function(){
                 var constr = this == '' ? 'empty' : this;
-                var text = constr + "<span class='badge'>" + data.frames[this].length + "</span>";
+                var count = data.frames[this].length;
+                if (count == $('#maxcon').val()) { count = count + '+' }
+                var text = constr + "<span class='badge'>" + count + "</span>";
                 $("<div class='panel panel-default col-md-12' id='class" + i + "'></div>")
                     .html("<div class='panel-heading'><h4 class='panel-title'><a data-toggle='collapse' href='#collapse" + i + "'>" + text + "</a></h4></div>")
                     .appendTo($("#extracted"));
@@ -159,16 +161,16 @@ $(document).ready(function(){
                 // somehow min threshold is not a number
                 $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Please enter positive integer value for minimal frequency!</strong></div>');
             } else {
-                  if ($('input[name=corpus]:checked', '#query').val() == 'post') {
-                      $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Sorry, Russian National Corpus is temporarily unavailable due to hosting\'s technical limitations. To enjoy full functionality, visit <a href="http://tieflingcat.pythonanywhere.com/extract">our mirror.</a></strong></div>');
-                  } else {
+                  //if ($('input[name=corpus]:checked', '#query').val() == 'post' || $('input[name=corpus]:checked', '#query').val() == 'pre') {
+                  //    $("#alerts").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Sorry, Russian National Corpus is temporarily unavailable due to hosting\'s technical limitations. To enjoy full functionality, visit <a href="http://tieflingcat.pythonanywhere.com/extract">our mirror.</a></strong></div>');
+                  //} else {
                         // everything ok
                         $('#loading-indicator').show();
                         $('#container').hide();
                         $('#container').html('');
                         $('#extracted').text('');
                         extract();
-                  }
+                  //}
             }
         }
     });

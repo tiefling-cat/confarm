@@ -4,7 +4,7 @@ from flask import Flask, request, session, jsonify
 from flask import render_template, make_response
 from flask import redirect, url_for
 from werkzeug import secure_filename
-import uuid, os, sys
+import uuid, os
 from utilities.simpl_ex import extract_frames as xf # nashe vsio
 
 # BEGIN: UGLY MONKEYPATCH
@@ -24,12 +24,14 @@ app.config.from_pyfile(os.path.join(os.path.dirname(__file__), 'config.py'))
 
 iroot_stgr = app.config['STR_INDEX']
 croot_stgr = app.config['STR_CORPS']
+iroot_pre = app.config['PRE50_INDEX']
+croot_pre = app.config['PRE50_CORPS']
 iroot_post = app.config['POST50_INDEX']
 croot_post = app.config['POST50_CORPS']
 pfldr = app.config['PIC_FOLDR']
 jsonfldr = app.config['JSON_FOLDR']
 
-corpora = {'post':(iroot_post, croot_post), 'stgr':(iroot_stgr, croot_stgr)}
+corpora = {'pre':(iroot_pre, croot_pre), 'post':(iroot_post, croot_post), 'stgr':(iroot_stgr, croot_stgr)}
 
 secret_path = app.config['FLASK_SECRET']
 with open(secret_path, 'rb') as fd:

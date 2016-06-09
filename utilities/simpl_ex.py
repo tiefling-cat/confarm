@@ -146,7 +146,7 @@ def level_pos(relset_levels, width=1., dy=0.1, vloc=0):
         vloc = vloc - dy
     return pos
 
-def token_signature(token, usepos, usecase, useanim, strip):
+def token_signature(dad_pos, token, usepos, usecase, useanim, strip):
     signature = token[9]
     feats = token[5].split(' ')
     pos = token[3]
@@ -156,7 +156,9 @@ def token_signature(token, usepos, usecase, useanim, strip):
     if usepos:
         signature = ' '.join([signature, token[3]])
     if usecase:
-        if pos in casepos:
+        if dad_pos == 'S' and pos in {'A', 'APRO'} and token[9] in {'квазиагент', 'опред'}:
+            pass
+        elif pos in casepos:
             try:
                 signature = ' '.join([signature, feats[casepos[token[3]]]])
             except IndexError:
@@ -179,7 +181,7 @@ def token_signature(token, usepos, usecase, useanim, strip):
         signature = ' '.join([signature, feats[1]])
     return signature
 
-def get_children(sent, dad_id, marker_set, pr=True,
+def get_children(pos, sent, dad_id, marker_set, pr=True,
                  usepos=False, usecase=False, useanim=False,
                  splice=False, strip=False,
                  negrels=(), prnegrels=()):
@@ -198,7 +200,7 @@ def get_children(sent, dad_id, marker_set, pr=True,
                     # direct child with allowed relation
                     if pr:
                         token[8] = marker_set[2]
-                        token[9] = token_signature(token, usepos, usecase, useanim, strip)
+                        token[9] = token_signature(pos, token, usepos, usecase, useanim, strip)
                     else:
                         token[8] = marker_set[4]
                     children.append(token)
@@ -206,7 +208,7 @@ def get_children(sent, dad_id, marker_set, pr=True,
                 # it's a preposition
                 # deal with preposition's children
                 token[8] = marker_set[3]
-                pr_children = get_children(sent[i+1:], i+1, marker_set, pr=False)
+                pr_children = get_children(pos, sent[i+1:], i+1, marker_set, pr=False)
                 for child in pr_children:
                     # normalize preposition and put it after link
                     if splice and (token[9] == 'обст' or token[9].endswith('компл')):
@@ -214,7 +216,7 @@ def get_children(sent, dad_id, marker_set, pr=True,
                     elif strip and token[9].endswith('компл'):
                         token[9] = token[9][2:]
                     child[9] = ':'.join([token[9], prdict.get(token[2], token[2])])
-                    child[9] = token_signature(child, usepos, usecase, useanim, strip=False)
+                    child[9] = token_signature(pos, child, usepos, usecase, useanim, strip=False)
                     children.append(child)
     return children
 
@@ -227,9 +229,9 @@ def get_children_posrels(sent, dad_id, marker_set, pr=False,
         if int(token[6]) == dad_id and \
            token[3] not in ['PUNC', 'SENT'] and \
            token[7] not in relfilter and token[7] in posrels:
-            if token[9] == '_':
+            if token[8] == '_':
                 token[8] = marker_set[2]
-                token[9] = token_signature(token, usepos, usecase, useanim, strip)
+                token[9] = token_signature(None, token, usepos, usecase, useanim, strip)
                 children.append(token)
     return children
 
@@ -251,13 +253,13 @@ def prepare_tokens(raw_tokens):
         tokens.append(token)
     return tokens
 
-def extract_frame(tokens, tok_id,
+def extract_frame(pos, tokens, tok_id,
             usepos, pro, usecase, useanim, 
             splice, strip, 
             posfeats, negfeats, 
             posrels, negrels, prnegrels):
 
-    frame = get_children(tokens, tok_id, short_marker_set, 
+    frame = get_children(pos, tokens, tok_id, short_marker_set, 
                          usepos=usepos, usecase=usecase, useanim=useanim,
                          splice=splice, strip=strip,
                          negrels=negrels, prnegrels=prnegrels)
@@ -272,7 +274,7 @@ def extract_frame(tokens, tok_id,
 
                 if feats[3] == 'inf':
                     # infinitives are kings
-                    distant_frame = get_children(tokens, dad_id, long_marker_set,
+                    distant_frame = get_children(pos, tokens, dad_id, long_marker_set,
                                                  usepos=usepos, usecase=usecase, useanim=useanim,
                                                  splice=splice, strip=strip,
                                                  negrels=negrels, prnegrels=prnegrels)
@@ -309,7 +311,7 @@ def extract_frame(tokens, tok_id,
 
             # some stuff for nouns
             elif tokens[tok_id - 1][3] == 'S' and tokens[tok_id - 1][5].split(' ')[2] == 'acc':
-                distant_frame = get_children(tokens, dad_id, long_marker_set, 
+                distant_frame = get_children(pos, tokens, dad_id, long_marker_set, 
                                          usepos=usepos, usecase=usecase, useanim=useanim,
                                          splice=splice, strip=strip,
                                          negrels=negrels, prnegrels=prnegrels)
@@ -363,7 +365,7 @@ def extract_frame(tokens, tok_id,
             token[9] = token[9].replace('PRO', '')
     return frame
 
-def extract(idict, croot, 
+def extract(idict, croot, dad_pos, 
             minfreq, maxfreq, maxcon, minpts,
             usepos, pro, usecase, useanim, 
             splice, strip, 
@@ -373,6 +375,7 @@ def extract(idict, croot,
     Find all sentences within idict,
     get them, extract frames.
     """
+    posrels = set(posrels)
     relset_dict, totl = {}, len(idict)
     for i, (ifname, entries) in enumerate(idict.items()):
         print('{}/{} Extracting from {}'.format(i, totl, ifname))
@@ -396,15 +399,14 @@ def extract(idict, croot,
                 tokens = prepare_tokens(raw_tokens)
 
                 # extract frame
-                frame = extract_frame(tokens, tok_id,
+                frame = extract_frame(dad_pos, tokens, tok_id,
                                       usepos, pro, usecase, useanim, 
                                       splice, strip, 
                                       posfeats, negfeats, 
                                       posrels, negrels, prnegrels)
 
                 if len(frame) >= minpts:
-                    if posrels == [] or posrels == () or \
-                       any(token[7] in posrels for token in frame if token[0] != tok_id):
+                    if posrels.issubset(set(token[7] for token in frame if token[0] != tok_id)):
                         relset = get_relset(frame)
                         relset_dict.setdefault(relset, [])
                         if maxcon == -1 or len(relset_dict[relset]) < maxcon:
@@ -433,7 +435,7 @@ def extract_frames(lemma, iroot, croot, jsonpath, usepos=False,
         return {'error':'FileNotFoundError'}
 
     print('Extracting constructions')
-    relset_dict = extract(idict, croot, minfreq, maxfreq, maxcon, minpts, 
+    relset_dict = extract(idict, croot, lemma[1], minfreq, maxfreq, maxcon, minpts, 
                           usepos, pro, usecase, useanim, splice, strip,
                           posfeats=posfeats, negfeats=negfeats,
                           posrels=posrels, negrels=negrels, prnegrels=prnegrels)
